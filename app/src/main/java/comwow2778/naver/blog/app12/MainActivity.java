@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     Animation anim1;
     ListView listview;
     ArrayAdapter<String> adapter;
+    ArrayList<String> viewdata;
     ArrayList<data> data;
     data datatype;
     @Override
@@ -49,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
         webView = (WebView)findViewById(R.id.webview);
         webView.addJavascriptInterface(new JavaScriptMethods(),"myapp");
         data = new ArrayList<data>();
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
+        viewdata = new ArrayList<String>();
+        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,viewdata);
         et = (EditText)findViewById(R.id.et);
         dialog = new ProgressDialog(this);
         listview.setAdapter(adapter);
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.remove(position);
+                        viewdata.remove(position);
                         adapter.notifyDataSetChanged();
                     }
                 });
@@ -203,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                     if(same == 0) {
                         datatype = new data(sitename, url);
                         data.add(datatype);
-                        adapter.add("<" +sitename + ">" + url);
+                        viewdata.add("<" +sitename + ">" + url);
                         adapter.notifyDataSetChanged();
                         Toast.makeText(getApplicationContext(), "즐겨찾기에 추가되었습니다",
                                 Toast.LENGTH_SHORT).show();
