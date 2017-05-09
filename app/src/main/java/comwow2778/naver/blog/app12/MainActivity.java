@@ -33,10 +33,9 @@ public class MainActivity extends AppCompatActivity {
     WebView webView;
     EditText et;
     ProgressDialog dialog;
-    LinearLayout L1;
+    LinearLayout linearLayout;
     Animation anim1;
-    LinearLayout L2;
-    ListView L3;
+    ListView listview;
     ArrayAdapter<String> adapter;
     ArrayList<data> data;
     data datatype;
@@ -44,29 +43,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        L1 = (LinearLayout)findViewById(R.id.LinearLayout);
-        L2 = (LinearLayout)findViewById(R.id.layout1);
-        L3 = (ListView)findViewById(R.id.layout2);
+        linearLayout = (LinearLayout)findViewById(R.id.LinearLayout);
+        listview = (ListView)findViewById(R.id.listview);
         anim1 = AnimationUtils.loadAnimation(this,R.anim.anim);
         webView = (WebView)findViewById(R.id.webview);
         webView.addJavascriptInterface(new JavaScriptMethods(),"myapp");
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         data = new ArrayList<data>();
-        L3.setAdapter(adapter);
+        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         et = (EditText)findViewById(R.id.et);
         dialog = new ProgressDialog(this);
-
-        L3.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listview.setAdapter(adapter);
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //클릭햇을때
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                dialog.setTitle("삭제확인");
+                dialog.setNegativeButton("취소",null);
+                dialog.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        data.remove(position);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                dialog.show();
+                return true;
             }
         });
-
-        webView.setWebViewClient(new WebViewClient(){
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return super.shouldOverrideUrlLoading(view, request);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                linearLayout.setVisibility(View.VISIBLE);
+                webView.setVisibility(View.VISIBLE);
+                listview.setVisibility(View.INVISIBLE);
+                String url = data.get(position).getUrl();
+                webView.loadUrl("http://"+url);
             }
         });
         webView.setWebChromeClient(new WebChromeClient(){
@@ -76,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
+                if(newProgress >=100) dialog.dismiss();
                 super.onProgressChanged(view, newProgress);
             }
         });
@@ -83,18 +95,19 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
                 dialog.setMessage("Loading!");
                 dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 dialog.show();
+                super.onPageStarted(view, url, favicon);
             }
-        });
-
-        webView.setWebChromeClient(new WebChromeClient(){
             @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                super.onProgressChanged(view, newProgress);
-                if(newProgress >=100) dialog.dismiss();
+            public void onPageFinished(WebView view, String url) {
+                et.setText(url);
+                super.onPageFinished(view, url);
+            }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return super.shouldOverrideUrlLoading(view, request);
             }
         });
         webView.loadUrl("https://www.naver.com");
@@ -108,12 +121,11 @@ public class MainActivity extends AppCompatActivity {
         anim1.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                L1.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                L1.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
             }
 
             @Override
@@ -132,20 +144,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==1){
-            webView.loadUrl("file:///android_asset/www/addurl.html");
-            L1.setAnimation(anim1);
+            linearLayout.setAnimation(anim1);
             anim1.start();
+            linearLayout.setVisibility(View.INVISIBLE);
+            webView.setVisibility(View.VISIBLE);
+            listview.setVisibility(View.INVISIBLE);
+            webView.loadUrl("file:///android_asset/www/addurl.html");
         }
         else{
-            //리스트뷰내용
+            linearLayout.setVisibility(View.GONE);
+            webView.setVisibility(View.INVISIBLE);
+            listview.setVisibility(View.VISIBLE);
         }
         return super.onOptionsItemSelected(item);
     }
+
     Handler myhandler = new Handler();
 
     class JavaScriptMethods {
 
-        @JavascriptInterface
+        @JavascriptInterface/*
         public void displayToast(){
            // Toast.makeText(getApplicationContext(),"Hello",Toast.LENGTH_SHORT).show();
            myhandler.post(new Runnable() {
@@ -162,21 +180,43 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+        }*/
+        public void visible(){
+            myhandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    linearLayout.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        @JavascriptInterface
+        public void saveurl(final String sitename, final String url){
+            myhandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    int same = 0;
+                    for(int i=0; i < data.size(); i++){
+                        if(data.get(i).getUrl().equals(url)) {
+                            same++;
+                        }
+                    }
+                    if(same == 0) {
+                        datatype = new data(sitename, url);
+                        data.add(datatype);
+                        adapter.add("<" +sitename + ">" + url);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(), "즐겨찾기에 추가되었습니다",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        webView.loadUrl("javascript:displayMsg()");
+                    }
+                }
+            });
         }
     }
 
     public void onClick(View v){
-        if(v.getId() == R.id.btn2){
-            webView.loadUrl("javascript:changeImage()");
-        }
-
+            webView.loadUrl("http://" + et.getText().toString());
     }
-    public void ListViewadd(String name,String url){
-        datatype.setName(name);
-        datatype.setUrl(url);
-        data.add(datatype);
-        adapter.add("<"+name+">"+url);
-        adapter.notifyDataSetChanged();
-    }
-
 }

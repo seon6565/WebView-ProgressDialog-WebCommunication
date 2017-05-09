@@ -1,53 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="comwow2778.naver.blog.app12.MainActivity">
 
-    <ListView
-        android:id="@+id/layout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-    </ListView>
-
-    <LinearLayout
-    android:visibility="visible"
-    android:id="@+id/layout1"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
     <LinearLayout
         android:id="@+id/LinearLayout"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <EditText
             android:id="@+id/et"
-            android:ems="10"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:ems="10" />
+
+        <Button
             android:id="@+id/btn1"
-            android:text="go"
-            android:onClick="onClick"/>
-        <Button
-            android:id="@+id/btn2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:text="go" />
+
     </LinearLayout>
 
-    <WebView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/webview"/>
+        android:layout_height="match_parent">
 
-    </LinearLayout>
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-</FrameLayout>
+        <ListView
+            android:id="@+id/listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+        </ListView>
+    </FrameLayout>
+
+</LinearLayout>

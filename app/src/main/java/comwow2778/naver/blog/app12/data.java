@@ -1,7 +1,7 @@
 package comwow2778.naver.blog.app12;
 
 /**
- * Created by seon on 2017-05-04.
+ * Created by seon on 2017-05-09.
  */
 
 public class data {
@@ -11,6 +11,7 @@ public class data {
         this.name = name;
         this.url = url;
     }
+
     public String getName() {
         return name;
     }
